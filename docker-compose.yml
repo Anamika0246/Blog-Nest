@@ -1,0 +1,71 @@
+version: '3.9'
+services:
+
+  db_user:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: userdb
+    ports:
+      - "3307:3306"
+    volumes:
+      - user_data:/var/lib/mysql
+
+  db_post:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: postdb
+    ports:
+      - "3308:3306"
+    volumes:
+      - post_data:/var/lib/mysql
+
+  db_comment:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: commentdb
+    ports:
+      - "3309:3306"
+    volumes:
+      - comment_data:/var/lib/mysql
+
+  userservice:
+    build:
+      context: ./apps/userservice
+    env_file:
+      - ./apps/userservice/.env
+    depends_on:
+      - db_user
+    ports:
+      - "3001:3001"
+
+  postservice:
+    build:
+      context: ./apps/postservice
+    env_file:
+      - ./apps/postservice/.env
+    depends_on:
+      - db_post
+      - userservice
+    ports:
+      - "3002:3002"
+
+  commentservice:
+    build:
+      context: ./apps/commentservice
+    env_file:
+      - ./apps/commentservice/.env
+    depends_on:
+      - db_comment
+    ports:
+      - "3003:3003"
+
+volumes:
+  user_data:
+  post_data:
+  comment_data:
